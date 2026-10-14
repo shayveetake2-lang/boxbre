@@ -10,7 +10,7 @@ import { useWakeLock } from './hooks/useWakeLock';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 
 export const App: React.FC = () => {
-  // Sound engine
+  // Sound engine with iOS Safari proactive unlocking
   const soundEngine = useSoundEngine();
 
   // Box Breathing deterministic engine
@@ -52,13 +52,13 @@ export const App: React.FC = () => {
   });
 
   return (
-    <div className="relative w-screen h-screen bg-[#09090B] text-[#F4F4F6] flex flex-col justify-between overflow-hidden">
+    <div className="relative w-full h-[100dvh] min-h-[100dvh] bg-[#09090B] text-[#F4F4F6] flex flex-col justify-between overflow-hidden select-none overscroll-none touch-manipulation pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]">
       {/* Subtle Analog Film Texture */}
       <NoiseOverlay />
 
       {/* Top Status Bar (fades in Zen Mode) */}
       <div
-        className={`w-full transition-opacity duration-700 z-30 ${
+        className={`w-full transition-opacity duration-700 z-30 shrink-0 ${
           isZenInactive ? 'opacity-15 hover:opacity-100' : 'opacity-100'
         }`}
       >
@@ -69,8 +69,8 @@ export const App: React.FC = () => {
         />
       </div>
 
-      {/* Central Precision Visualizer Stage (~80% Viewport Height) */}
-      <main className="flex-1 w-full flex items-center justify-center relative z-10 px-4">
+      {/* Central Precision Visualizer Stage (Interactive tap-to-toggle) */}
+      <main className="flex-1 w-full flex items-center justify-center relative z-10 px-2 sm:px-4 my-auto">
         <BoxVisualizer
           phase={breathing.phase}
           state={breathing.state}
@@ -79,6 +79,7 @@ export const App: React.FC = () => {
           secondsRemainingInPhase={breathing.secondsRemainingInPhase}
           formattedSecondsRemaining={breathing.formattedSecondsRemaining}
           sideDuration={breathing.sideDuration}
+          onTogglePlay={breathing.togglePlay}
         />
       </main>
 
@@ -103,4 +104,3 @@ export const App: React.FC = () => {
 };
 
 export default App;
-

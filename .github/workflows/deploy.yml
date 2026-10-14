@@ -1,0 +1,35 @@
+name: Build & Verify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    name: Typecheck & Static Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build static export
+        run: npm run build
+
+      - name: Verify build artifacts
+        run: |
+          test -f dist/index.html || exit 1
+          test -f dist/favicon.svg || exit 1
+          test -f dist/manifest.json || exit 1
+          echo "Static export verified successfully!"

@@ -28,6 +28,7 @@
 
 html, body, #root {
   height: 100%;
+  height: 100dvh;
   width: 100%;
   margin: 0;
   padding: 0;
@@ -36,6 +37,9 @@ html, body, #root {
   overflow: hidden;
   user-select: none;
   -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  overscroll-behavior: none;
+  touch-action: manipulation;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -53,6 +57,7 @@ html, body, #root {
   left: 0;
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   pointer-events: none;
   z-index: 50;
   opacity: 0.035;
@@ -61,7 +66,7 @@ html, body, #root {
 
 /* Hairline glass surface */
 .glass-panel {
-  background: rgba(18, 18, 21, 0.65);
+  background: rgba(18, 18, 21, 0.7);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -70,8 +75,17 @@ html, body, #root {
 /* Tactile button press feedback */
 .tactile-button {
   transition: transform 0.08s ease, background-color 0.15s ease, border-color 0.15s ease;
+  touch-action: manipulation;
 }
 .tactile-button:active {
-  transform: scale(0.96);
+  transform: scale(0.95);
 }
 
+/* Safe area utilities for iPhone notch / home indicator */
+.safe-top {
+  padding-top: max(1rem, env(safe-area-inset-top));
+}
+
+.safe-bottom {
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+}

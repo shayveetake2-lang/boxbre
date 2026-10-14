@@ -33,37 +33,75 @@ export const useSoundEngine = (): UseSoundEngineReturn => {
   const audioCtxRef = useRef<AudioContext | null>(null);
   const masterGainRef = useRef<GainNode | null>(null);
   const compressorRef = useRef<DynamicsCompressorNode | null>(null);
+  const isUnlockedRef = useRef<boolean>(false);
 
-  // Initialize Audio Context on user gesture
+  // Initialize and prime Audio Context (with iOS Safari unlock guarantee)
   const initAudio = useCallback(() => {
-    if (!audioCtxRef.current) {
-      const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      const ctx = new AudioContextClass();
+    try {
+      if (!audioCtxRef.current) {
+        const AudioContextClass =
+          window.AudioContext ||
+          (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        const ctx = new AudioContextClass();
 
-      // Master Compressor to prevent any clipping/distortion
-      const compressor = ctx.createDynamicsCompressor();
-      compressor.threshold.setValueAtTime(-12, ctx.currentTime);
-      compressor.knee.setValueAtTime(10, ctx.currentTime);
-      compressor.ratio.setValueAtTime(4, ctx.currentTime);
-      compressor.attack.setValueAtTime(0.003, ctx.currentTime);
-      compressor.release.setValueAtTime(0.25, ctx.currentTime);
+        // Master Compressor to prevent any clipping/distortion
+        const compressor = ctx.createDynamicsCompressor();
+        compressor.threshold.setValueAtTime(-12, ctx.currentTime);
+        compressor.knee.setValueAtTime(10, ctx.currentTime);
+        compressor.ratio.setValueAtTime(4, ctx.currentTime);
+        compressor.attack.setValueAtTime(0.003, ctx.currentTime);
+        compressor.release.setValueAtTime(0.25, ctx.currentTime);
 
-      // Master Gain
-      const masterGain = ctx.createGain();
-      masterGain.gain.setValueAtTime(isMuted ? 0 : 0.35, ctx.currentTime);
+        // Master Gain
+        const masterGain = ctx.createGain();
+        masterGain.gain.setValueAtTime(isMuted ? 0 : 0.35, ctx.currentTime);
 
-      masterGain.connect(compressor);
-      compressor.connect(ctx.destination);
+        masterGain.connect(compressor);
+        compressor.connect(ctx.destination);
 
-      audioCtxRef.current = ctx;
-      masterGainRef.current = masterGain;
-      compressorRef.current = compressor;
-    }
+        audioCtxRef.current = ctx;
+        masterGainRef.current = masterGain;
+        compressorRef.current = compressor;
+      }
 
-    if (audioCtxRef.current && audioCtxRef.current.state === 'suspended') {
-      audioCtxRef.current.resume();
+      const ctx = audioCtxRef.current;
+      if (ctx && ctx.state === 'suspended') {
+        ctx.resume();
+      }
+
+      // iOS Safari Audio Unlock: play a 1-sample silent buffer
+      if (ctx && !isUnlockedRef.current) {
+        const silentBuffer = ctx.createBuffer(1, 1, 22050);
+        const source = ctx.createBufferSource();
+        source.buffer = silentBuffer;
+        source.connect(ctx.destination);
+        source.start(0);
+        isUnlockedRef.current = true;
+      }
+    } catch {
+      // AudioContext unavailable or blocked by system
     }
   }, [isMuted]);
+
+  // One-time listener on first user interaction to proactively unlock audio
+  useEffect(() => {
+    const handleFirstTouch = () => {
+      initAudio();
+      window.removeEventListener('pointerdown', handleFirstTouch);
+      window.removeEventListener('touchstart', handleFirstTouch);
+      window.removeEventListener('keydown', handleFirstTouch);
+    };
+
+    window.addEventListener('pointerdown', handleFirstTouch, { once: true, passive: true });
+    window.addEventListener('touchstart', handleFirstTouch, { once: true, passive: true });
+    window.addEventListener('keydown', handleFirstTouch, { once: true, passive: true });
+
+    return () => {
+      window.removeEventListener('pointerdown', handleFirstTouch);
+      window.removeEventListener('touchstart', handleFirstTouch);
+      window.removeEventListener('keydown', handleFirstTouch);
+    };
+  }, [initAudio]);
 
   // Update master gain when muted state toggles
   useEffect(() => {
@@ -286,4 +324,3 @@ export const useSoundEngine = (): UseSoundEngineReturn => {
     initAudio,
   };
 };
-

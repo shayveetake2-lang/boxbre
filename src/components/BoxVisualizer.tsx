@@ -13,6 +13,7 @@ interface BoxVisualizerProps {
     dec: string;
   };
   sideDuration: number;
+  onTogglePlay?: () => void;
 }
 
 // EaseInOut cubic smoothstep
@@ -28,6 +29,7 @@ export const BoxVisualizer: React.FC<BoxVisualizerProps> = ({
   totalBoxProgress,
   formattedSecondsRemaining,
   sideDuration,
+  onTogglePlay,
 }) => {
   const { accentColor, accentGlow } = useTheme();
 
@@ -100,18 +102,30 @@ export const BoxVisualizer: React.FC<BoxVisualizerProps> = ({
   const phaseConfig = PHASE_CONFIGS[phase];
 
   return (
-    <div className="relative flex flex-col items-center justify-center w-full max-w-[420px] aspect-square mx-auto p-4 select-none">
+    <div
+      onClick={onTogglePlay}
+      role="button"
+      tabIndex={0}
+      aria-label={state === 'RUNNING' ? 'Pause breathing session' : 'Start breathing session'}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onTogglePlay?.();
+        }
+      }}
+      className="relative flex flex-col items-center justify-center w-[min(380px,84vw,48dvh)] aspect-square mx-auto p-2 sm:p-4 select-none cursor-pointer active:scale-[0.985] transition-transform duration-100 outline-none focus-visible:ring-1 focus-visible:ring-white/20 rounded-3xl"
+    >
       {/* Precision corner ticks (outer bounding box markers) */}
-      <div className="absolute top-2 left-2 w-3.5 h-3.5 border-t border-l border-white/20" />
-      <div className="absolute top-2 right-2 w-3.5 h-3.5 border-t border-r border-white/20" />
-      <div className="absolute bottom-2 left-2 w-3.5 h-3.5 border-b border-l border-white/20" />
-      <div className="absolute bottom-2 right-2 w-3.5 h-3.5 border-b border-r border-white/20" />
+      <div className="absolute top-1 left-1 sm:top-2 sm:left-2 w-3 sm:w-3.5 h-3 sm:h-3.5 border-t border-l border-white/20" />
+      <div className="absolute top-1 right-1 sm:top-2 sm:right-2 w-3 sm:w-3.5 h-3 sm:h-3.5 border-t border-r border-white/20" />
+      <div className="absolute bottom-1 left-1 sm:bottom-2 sm:left-2 w-3 sm:w-3.5 h-3 sm:h-3.5 border-b border-l border-white/20" />
+      <div className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2 w-3 sm:w-3.5 h-3 sm:h-3.5 border-b border-r border-white/20" />
 
       {/* Axis alignment crosshairs */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-2 bg-white/20" />
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-px h-2 bg-white/20" />
-      <div className="absolute left-0 top-1/2 -translate-y-1/2 h-px w-2 bg-white/20" />
-      <div className="absolute right-0 top-1/2 -translate-y-1/2 h-px w-2 bg-white/20" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-1.5 sm:h-2 bg-white/20" />
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-px h-1.5 sm:h-2 bg-white/20" />
+      <div className="absolute left-0 top-1/2 -translate-y-1/2 h-px w-1.5 sm:w-2 bg-white/20" />
+      <div className="absolute right-0 top-1/2 -translate-y-1/2 h-px w-1.5 sm:w-2 bg-white/20" />
 
       {/* Main Precision SVG Canvas */}
       <div className="relative w-full h-full flex items-center justify-center">
@@ -213,21 +227,21 @@ export const BoxVisualizer: React.FC<BoxVisualizerProps> = ({
         >
           {/* Layer 1: Frosted Ambient Glow */}
           <div
-            className="w-56 h-56 rounded-[28px] border border-white/10 backdrop-blur-md flex items-center justify-center transition-colors duration-500"
+            className="w-44 h-44 sm:w-56 sm:h-56 rounded-[22px] sm:rounded-[28px] border border-white/10 backdrop-blur-md flex items-center justify-center transition-colors duration-500"
             style={{
               background: `radial-gradient(circle at center, ${accentColor}18 0%, rgba(18, 18, 21, 0.75) 75%)`,
-              boxShadow: `0 0 40px ${accentGlow}`,
+              boxShadow: `0 0 35px ${accentGlow}`,
             }}
           >
             {/* Layer 2: Inner Chamfered Ring */}
-            <div className="w-40 h-40 rounded-[20px] border border-white/10 flex items-center justify-center bg-black/20" />
+            <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-[16px] sm:rounded-[20px] border border-white/10 flex items-center justify-center bg-black/20" />
           </div>
         </div>
 
         {/* Center Precision HUD Readout */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none text-center">
+        <div className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none text-center px-4">
           {/* Phase Badge */}
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/10 bg-zinc-950/70 backdrop-blur-md mb-2 shadow-sm">
+          <div className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full border border-white/10 bg-zinc-950/70 backdrop-blur-md mb-1 sm:mb-2 shadow-sm">
             <span
               className="w-1.5 h-1.5 rounded-full transition-all duration-300"
               style={{
@@ -235,28 +249,27 @@ export const BoxVisualizer: React.FC<BoxVisualizerProps> = ({
                 boxShadow: state === 'RUNNING' ? `0 0 8px ${accentColor}` : 'none',
               }}
             />
-            <span className="font-mono text-[11px] tracking-[0.25em] uppercase font-semibold text-zinc-300">
+            <span className="font-mono text-[10px] sm:text-[11px] tracking-[0.25em] uppercase font-semibold text-zinc-300">
               {state === 'IDLE' ? 'READY' : phaseConfig.label}
             </span>
           </div>
 
           {/* Large Tabular Monospace Number */}
-          <div className="flex items-baseline font-mono font-light text-zinc-100 tabular-nums tracking-tighter leading-none my-1">
-            <span className="text-6xl sm:text-7xl font-extralight">
+          <div className="flex items-baseline font-mono font-light text-zinc-100 tabular-nums tracking-tighter leading-none my-0.5 sm:my-1">
+            <span className="text-5xl sm:text-7xl font-extralight">
               {state === 'IDLE'
                 ? sideDuration.toFixed(0)
                 : formattedSecondsRemaining.dec}
             </span>
-            <span className="text-lg text-zinc-500 font-normal ml-1">s</span>
+            <span className="text-base sm:text-lg text-zinc-500 font-normal ml-1">s</span>
           </div>
 
           {/* Micro-Instruction */}
-          <p className="font-sans text-[11px] text-zinc-400 font-normal tracking-wide max-w-[200px] mt-2 transition-opacity duration-300">
-            {state === 'IDLE' ? 'Press Start or Space' : phaseConfig.instruction}
+          <p className="font-sans text-[10px] sm:text-[11px] text-zinc-400 font-normal tracking-wide max-w-[200px] mt-1 sm:mt-2 transition-opacity duration-300">
+            {state === 'IDLE' ? 'Tap or press Space' : phaseConfig.instruction}
           </p>
         </div>
       </div>
     </div>
   );
 };
-
