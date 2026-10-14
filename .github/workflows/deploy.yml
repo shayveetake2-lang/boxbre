@@ -33,3 +33,4 @@ jobs:
           test -f dist/favicon.svg || exit 1
           test -f dist/manifest.json || exit 1
           echo "Static export verified successfully!"
+
