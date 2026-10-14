@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --accent-color: #FF4F00;
+  --accent-rgb: 255, 79, 0;
+  --accent-glow: rgba(255, 79, 0, 0.35);
+}
+
+[data-theme="sage"] {
+  --accent-color: #A3B19B;
+  --accent-rgb: 163, 177, 155;
+  --accent-glow: rgba(163, 177, 155, 0.4);
+}
+
+[data-theme="alabaster"] {
+  --accent-color: #F4F4F6;
+  --accent-rgb: 244, 244, 246;
+  --accent-glow: rgba(244, 244, 246, 0.35);
+}
+
+[data-theme="orange"] {
+  --accent-color: #FF4F00;
+  --accent-rgb: 255, 79, 0;
+  --accent-glow: rgba(255, 79, 0, 0.35);
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #09090B;
+  color: #F4F4F6;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Tabular numbers lock */
+.tabular-nums {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+/* Subtle procedural SVG noise pattern for physical matte texture */
+.noise-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Hairline glass surface */
+.glass-panel {
+  background: rgba(18, 18, 21, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Tactile button press feedback */
+.tactile-button {
+  transition: transform 0.08s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+.tactile-button:active {
+  transform: scale(0.96);
+}
+
