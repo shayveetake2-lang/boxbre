@@ -3,9 +3,18 @@
 @tailwind utilities;
 
 :root {
-  --accent-color: #FF4F00;
-  --accent-rgb: 255, 79, 0;
-  --accent-glow: rgba(255, 79, 0, 0.35);
+  --accent-color: #38BDF8;
+  --accent-rgb: 56, 189, 248;
+  --accent-glow: rgba(56, 189, 248, 0.45);
+  --phase-color: #E4E4E7;
+  --phase-glow: rgba(228, 228, 231, 0.20);
+  --phase-ambient: rgba(228, 228, 231, 0.04);
+}
+
+[data-theme="dynamic"] {
+  --accent-color: #38BDF8;
+  --accent-rgb: 56, 189, 248;
+  --accent-glow: rgba(56, 189, 248, 0.45);
 }
 
 [data-theme="sage"] {
@@ -29,7 +38,9 @@
 html, body, #root {
   height: 100%;
   height: 100dvh;
+  max-height: 100dvh;
   width: 100%;
+  width: 100vw;
   margin: 0;
   padding: 0;
   background-color: #09090B;
@@ -43,6 +54,16 @@ html, body, #root {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* Smooth phase color transition */
+.transition-phase {
+  transition: color 700ms cubic-bezier(0.22, 1, 0.36, 1),
+              background-color 700ms cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 700ms cubic-bezier(0.22, 1, 0.36, 1),
+              stroke 700ms cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 
 /* Tabular numbers lock */
 .tabular-nums {

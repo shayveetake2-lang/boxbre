@@ -160,10 +160,10 @@ export const ControlsDock: React.FC<ControlsDockProps> = ({
           {/* Primary Play / Pause Button */}
           <button
             onClick={onTogglePlay}
-            className="tactile-button relative w-11 h-11 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-all duration-200"
+            className="tactile-button relative w-11 h-11 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-all duration-700"
             style={{
-              backgroundColor: accentColor,
-              boxShadow: `0 0 18px ${accentColor}45`,
+              backgroundColor: 'var(--phase-color, ' + accentColor + ')',
+              boxShadow: '0 0 18px var(--phase-glow, ' + accentColor + '45)',
             }}
             aria-label={state === 'RUNNING' ? 'Pause session' : 'Start breathing session'}
           >
@@ -235,10 +235,10 @@ export const ControlsDock: React.FC<ControlsDockProps> = ({
         {targetDuration !== 'infinite' && (
           <div className="w-40 sm:w-48 h-1 bg-white/5 rounded-full overflow-hidden mt-0.5 border border-white/5">
             <div
-              className="h-full transition-all duration-300 rounded-full"
+              className="h-full transition-all duration-700 rounded-full"
               style={{
                 width: `${targetProgressPercent}%`,
-                backgroundColor: accentColor,
+                backgroundColor: 'var(--phase-color, ' + accentColor + ')',
               }}
             />
           </div>

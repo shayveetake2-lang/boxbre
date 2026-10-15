@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { TopBar } from './components/TopBar';
 import { NoiseOverlay } from './components/NoiseOverlay';
 import { BoxVisualizer } from './components/BoxVisualizer';
@@ -8,8 +8,11 @@ import { useSoundEngine } from './hooks/useSoundEngine';
 import { useInactivity } from './hooks/useInactivity';
 import { useWakeLock } from './hooks/useWakeLock';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+import { useTheme } from './context/ThemeContext';
 
 export const App: React.FC = () => {
+  const { getPhaseTheme } = useTheme();
+
   // Sound engine with iOS Safari proactive unlocking
   const soundEngine = useSoundEngine();
 
@@ -26,6 +29,29 @@ export const App: React.FC = () => {
   });
 
   const isRunning = breathing.state === 'RUNNING';
+  const phaseTheme = getPhaseTheme(breathing.phase, isRunning);
+
+  // Synchronize CSS variables for phase reactive elements
+  useEffect(() => {
+    document.documentElement.style.setProperty('--phase-color', phaseTheme.hex);
+    document.documentElement.style.setProperty('--phase-glow', phaseTheme.glow);
+    document.documentElement.style.setProperty('--phase-ambient', phaseTheme.ambient);
+  }, [phaseTheme]);
+
+  // Hardware-accelerated ambient scaling
+  const p = breathing.phaseProgress * breathing.phaseProgress * (3 - 2 * breathing.phaseProgress);
+  let ambientScale = 1.0;
+  if (breathing.state === 'IDLE') {
+    ambientScale = 1.0;
+  } else if (breathing.phase === 'INHALE') {
+    ambientScale = 0.95 + 0.35 * p;
+  } else if (breathing.phase === 'HOLD_IN') {
+    ambientScale = 1.30;
+  } else if (breathing.phase === 'EXHALE') {
+    ambientScale = 1.30 - 0.35 * p;
+  } else if (breathing.phase === 'HOLD_OUT') {
+    ambientScale = 0.95;
+  }
 
   // Zen Mode: auto-fade HUD after 3 seconds of inactivity while running
   const isZenInactive = useInactivity(isRunning, 3000);
@@ -52,7 +78,24 @@ export const App: React.FC = () => {
   });
 
   return (
-    <div className="relative w-full h-[100dvh] min-h-[100dvh] bg-[#09090B] text-[#F4F4F6] flex flex-col justify-between overflow-hidden select-none overscroll-none touch-manipulation pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]">
+    <div className="relative w-screen h-[100dvh] min-h-[100dvh] max-h-[100dvh] bg-[#09090B] text-[#F4F4F6] flex flex-col justify-between overflow-hidden select-none overscroll-none touch-manipulation pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]">
+      {/* Zero-Jank Hardware-Accelerated Ambient Aura Backdrop */}
+      <div
+        className="fixed inset-0 pointer-events-none -z-10 overflow-hidden will-change-transform"
+        style={{
+          transform: `scale(${ambientScale})`,
+          transition: isRunning ? 'none' : 'transform 0.8s ease-out',
+        }}
+        aria-hidden="true"
+      >
+        <div
+          className="w-full h-full transition-[background] duration-700 ease-out"
+          style={{
+            background: `radial-gradient(circle at 50% 50%, ${phaseTheme.ambient} 0%, transparent 68%)`,
+          }}
+        />
+      </div>
+
       {/* Subtle Analog Film Texture */}
       <NoiseOverlay />
 
@@ -70,7 +113,7 @@ export const App: React.FC = () => {
       </div>
 
       {/* Central Precision Visualizer Stage (Interactive tap-to-toggle) */}
-      <main className="flex-1 w-full flex items-center justify-center relative z-10 px-2 sm:px-4 my-auto">
+      <main className="flex-1 w-full flex flex-col items-center justify-center relative z-10 px-2 sm:px-4 my-auto overflow-hidden">
         <BoxVisualizer
           phase={breathing.phase}
           state={breathing.state}
